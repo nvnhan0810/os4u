@@ -73,6 +73,14 @@ return [
             'replace_placeholders' => true,
         ],
 
+        'h35' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/h35.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
+
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
