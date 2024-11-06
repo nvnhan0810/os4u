@@ -73,9 +73,9 @@ return [
             'replace_placeholders' => true,
         ],
 
-        'h35' => [
+        'odoo_barcode' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/h35.log'),
+            'path' => storage_path('logs/odoo_barcode.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
