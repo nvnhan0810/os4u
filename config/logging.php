@@ -80,6 +80,13 @@ return [
             'days' => env('LOG_DAILY_DAYS', 14),
             'replace_placeholders' => true,
         ],
+        'odoo_approval' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/odoo_approval.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => env('LOG_DAILY_DAYS', 14),
+            'replace_placeholders' => true,
+        ],
 
         'slack' => [
             'driver' => 'slack',
