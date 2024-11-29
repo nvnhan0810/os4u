@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FcmController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
@@ -15,3 +16,5 @@ Route::post('odoo-approval/log', function (Request $request) {
 
     Log::channel('odoo_approval')->info(json_encode($data));
 });
+
+Route::post('fcm/send', [FcmController::class, 'sendNoti']);
