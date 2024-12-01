@@ -22,6 +22,9 @@ class ApiNotificationKeyMiddleware
         ]);
 
         if (!$request->header('X-Authorization')) {
+            Log::info(__METHOD__, [
+                'message' => 'Error Not Have Header',
+            ]);
             return response()->json([
                 'message' => 'UnAuthorization',
             ], 403);
@@ -30,10 +33,18 @@ class ApiNotificationKeyMiddleware
         $notification = ClientNotificationKey::where('notification_api_key', $request->header('X-Authorization'))->first();
 
         if (!$notification) {
+            Log::info(__METHOD__, [
+                'message' => 'Not Have Notification Key',
+            ]);
+
             return response()->json([
                 'message' => 'UnAuthorization',
             ], 403);
         }
+
+        Log::info(__METHOD__, [
+            'message' => 'Pass Middleware',
+        ]);
 
         return $next($request);
     }

@@ -22,6 +22,9 @@ class FCMSendNotiJob implements ShouldQueue
      */
     public function handle(Messaging $messaging): void
     {
+        Log::info(__METHOD__, [
+            'message' => '==== FCm JOB RUN====',
+        ]);
         $message = CloudMessage::new()
             ->withNotification(Notification::create($this->title, $this->description))
             ->withData($this->data)
