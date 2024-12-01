@@ -32,6 +32,10 @@ class ApiNotificationKeyMiddleware
 
         $notification = ClientNotificationKey::where('notification_api_key', $request->header('X-Authorization'))->first();
 
+        Log::info(__METHOD__, [
+            'notification' => $notification,
+        ]);
+
         if (!$notification) {
             Log::info(__METHOD__, [
                 'message' => 'Not Have Notification Key',
