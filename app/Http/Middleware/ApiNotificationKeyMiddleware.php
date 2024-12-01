@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\ClientNotificationKey;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class ApiNotificationKeyMiddleware
@@ -16,6 +17,10 @@ class ApiNotificationKeyMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        Log::info(__METHOD__, [
+            'X-Authorization' => $request->header('X-Authorization'),
+        ]);
+
         if (!$request->header('X-Authorization')) {
             return response()->json([
                 'message' => 'UnAuthorization',
