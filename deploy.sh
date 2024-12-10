@@ -11,3 +11,6 @@ php8.3 artisan migrate --force
 php8.3 artisan optimize
 
 sudo chown -R www-data:www-data *
+
+
+sudo supervisorctl restart "o4u-worker:*"
