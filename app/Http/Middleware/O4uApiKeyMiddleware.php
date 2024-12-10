@@ -2,13 +2,13 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\ClientNotificationKey;
+use App\Models\O4uClient;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
-class ApiNotificationKeyMiddleware
+class O4uApiKeyMiddleware
 {
     /**
      * Handle an incoming request.
@@ -30,15 +30,15 @@ class ApiNotificationKeyMiddleware
             ], 403);
         }
 
-        $notification = ClientNotificationKey::where('notification_api_key', $request->header('X-Authorization'))->first();
+        $client = O4uClient::where('api_key', $request->header('X-Authorization'))->first();
 
         Log::info(__METHOD__, [
-            'notification' => $notification,
+            'client' => $client,
         ]);
 
-        if (!$notification) {
+        if (!$client) {
             Log::info(__METHOD__, [
-                'message' => 'Not Have Notification Key',
+                'message' => 'Not Have API Key',
             ]);
 
             return response()->json([
@@ -48,6 +48,9 @@ class ApiNotificationKeyMiddleware
 
         Log::info(__METHOD__, [
             'message' => 'Pass Middleware',
+        ]);
+        $request->merge([
+            'client' => $client,
         ]);
 
         return $next($request);

@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ClientNotificationKey extends Model
+class O4uClient extends Model
 {
     use HasFactory;
 
@@ -14,14 +14,17 @@ class ClientNotificationKey extends Model
      */
     protected static function booted(): void
     {
-        static::created(function (ClientNotificationKey $notificationKey) {
-            $notificationKey->notification_api_key = $notificationKey->generateLicenseKey($notificationKey->id, 'o4u-firebase-notification-key');
-            $notificationKey->save();
+        static::created(function (O4uClient $client) {
+            $client->api_key = $client->generateLicenseKey($client->id, config('o4u.secret_key'));
+            if (!$client->start_date) {
+                $client->start_date = now();
+            }
+            $client->save();
         });
     }
 
     protected $fillable = [
-        'name', 'notification_api_key',
+        'name', 'api_key', 'start_date',
     ];
 
     /**
