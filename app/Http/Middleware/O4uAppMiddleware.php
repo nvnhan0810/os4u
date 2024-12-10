@@ -17,7 +17,7 @@ class O4uAppMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->header('X-App') && $request->header('X-App') != 'o4u_app') {
+    if (!$request->header('X-App-Key') && $request->header('X-App-Key') != config('o4u.mobile_app_key')) {
             Log::info('=== MISSING APP HEADER ====', [
                 'ip' => $request->ip(),
                 // IPs includes Proxy
@@ -26,7 +26,7 @@ class O4uAppMiddleware
             ]);
 
             return response()->json([
-                'message' => 'Forbiden',
+            'message' => 'Forbiden',
             ], JsonResponse::HTTP_FORBIDDEN);
         }
         return $next($request);

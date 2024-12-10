@@ -24,12 +24,12 @@ Route::middleware([
     O4uAppMiddleware::class,
 ])->group(function() {
     Route::post('/data/decrypt', [DataCryptoController::class, 'decrypt']);
+});
 
-    Route::middleware([
-        O4uApiKeyMiddleware::class
-    ])->group(function() {
-        Route::post('/data/encrypt', [DataCryptoController::class, 'encrypt']);
+Route::middleware([
+    O4uApiKeyMiddleware::class
+])->group(function() {
+    Route::post('/data/encrypt', [DataCryptoController::class, 'encrypt']);
 
-        Route::post('fcm/send', [FcmController::class, 'sendNoti']);
-    });
+    Route::post('fcm/send', [FcmController::class, 'sendNoti']);
 });
