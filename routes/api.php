@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppPermissionController;
 use App\Http\Controllers\Api\DataCryptoController;
 use App\Http\Controllers\Api\FcmController;
 use App\Http\Middleware\O4uApiKeyMiddleware;
@@ -23,6 +24,7 @@ Route::post('odoo-approval/log', function (Request $request) {
 Route::middleware([
     O4uAppMiddleware::class,
 ])->group(function() {
+    Route::post('/app/permissions', [AppPermissionController::class, 'checkPermissions']);
     Route::post('/data/decrypt', [DataCryptoController::class, 'decrypt']);
 });
 
