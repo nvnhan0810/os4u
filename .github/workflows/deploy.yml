@@ -56,7 +56,7 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
       - name: Copy build to VPS
         run: |
-          rsync -avz --progress --delete -e "ssh -i ~/.ssh/id_rsa" ${{ github.workspace }}  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/accounts
+          rsync -avz --progress --delete -e "ssh -i ~/.ssh/id_rsa" ${{ github.workspace }}  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/o4u
       - name: Deploy to Server
         if: ${{ success() }}
         uses: appleboy/ssh-action@master
@@ -66,7 +66,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/html/accounts
+            cd /var/www/html/o4u
             php8.3 artisan migrate --force
             php8.3 artisan optimize
             chown -R www-data:www-data *
