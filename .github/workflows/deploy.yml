@@ -1,0 +1,73 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+      - uses: actions/checkout@v3
+      - name: Copy .env
+        run: |
+          cp .env.prod .env
+          sed -i "s|{APP_KEY}|$APP_KEY|g" .env
+          sed -i "s|{DB_USERNAME}|$DB_USERNAME|g" .env
+          sed -i "s|{DB_PASSWORD}|$DB_PASSWORD|g" .env
+          sed -i "s|{GOOGLE_APPLICATION_CREDENTIALS}|$GOOGLE_APPLICATION_CREDENTIALS|g" .env
+          sed -i "s|{O4U_SECRET_KEY}|$O4U_SECRET_KEY|g" .env
+          sed -i "s|{MOBILE_APP_KEY}|$MOBILE_APP_KEY|g" .env
+        env:
+          APP_KEY: ${{ secrets.APP_KEY }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          O4U_SECRET_KEY: ${{ secrets.O4U_SECRET_KEY }}
+          MOBILE_APP_KEY: ${{ secrets.MOBILE_APP_KEY }}
+
+      - name: Install composer Dependencies
+        run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Set up SSH private key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/id_rsa
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+      - name: Configure SSH
+        run: |
+          touch ~/.ssh/config
+          echo -e "Host *\n\tStrictHostKeyChecking no\n" > ~/.ssh/config
+          touch ~/.ssh/known_hosts
+          echo "$SSH_HOST $SSH_KEY" > ~/.ssh/known_hosts
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+      - name: Copy build to VPS
+        run: |
+          rsync -avz --progress --delete -e "ssh -i ~/.ssh/id_rsa" ${{ github.workspace }}  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/accounts
+      - name: Deploy to Server
+        if: ${{ success() }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: 22
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /var/www/html/accounts
+            php8.3 artisan migrate --force
+            php8.3 artisan optimize
+            chown -R www-data:www-data *
+            supervisorctl restart "o4u-worker:*"
