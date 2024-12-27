@@ -97,7 +97,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             rm -rf /var/www/html/o4u/src
-            mv /var/www/html/o4u/os4u
+            mv /var/www/html/o4u/os4u /var/www/html/o4u/src
             cd /var/www/html/o4u/src
             php8.3 artisan migrate --force
             php8.3 artisan optimize:clear
