@@ -33,10 +33,40 @@ jobs:
       - name: Install composer Dependencies
         run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          include-hidden-files: true
+          path: |
+            ${{ github.workspace }}
+            !${{ github.workspace }}/.env
+
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: build-artifact
+          path: ${{ github.workspace }}
+
+      - name: Copy .env
+        run: |
+          cp .env.prod .env
+          sed -i "s|{APP_KEY}|$APP_KEY|g" .env
+          sed -i "s|{DB_USERNAME}|$DB_USERNAME|g" .env
+          sed -i "s|{DB_PASSWORD}|$DB_PASSWORD|g" .env
+          sed -i "s|{GOOGLE_APPLICATION_CREDENTIALS}|$GOOGLE_APPLICATION_CREDENTIALS|g" .env
+          sed -i "s|{O4U_SECRET_KEY}|$O4U_SECRET_KEY|g" .env
+          sed -i "s|{MOBILE_APP_KEY}|$MOBILE_APP_KEY|g" .env
+        env:
+          APP_KEY: ${{ secrets.APP_KEY }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          O4U_SECRET_KEY: ${{ secrets.O4U_SECRET_KEY }}
+          MOBILE_APP_KEY: ${{ secrets.MOBILE_APP_KEY }}
+
       - name: Set up SSH private key
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
@@ -66,8 +96,11 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd /var/www/html/o4u
+            rm -rf /var/www/html/o4u/src
+            mv /var/www/html/o4u/os4u
+            cd /var/www/html/o4u/src
             php8.3 artisan migrate --force
+            php8.3 artisan optimize:clear
             php8.3 artisan optimize
-            chown -R www-data:www-data *
+            chown -R www-data:www-data /var/www/html/o4u/src
             supervisorctl restart "o4u-worker:*"
