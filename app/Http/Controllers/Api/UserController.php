@@ -21,7 +21,7 @@ class UserController extends Controller
             'domain' => 'required|string',
             'db' => 'required|string',
         ]);
-        Cache::lock('user_device_unique', 10)->block(function() use ($request) {
+        Cache::lock('user_device_unique', 10)->block(5, function() use ($request) {
             $user = ClientUser::with(['devices'])
                 ->where('username', $request->username)
                 ->where('domain', $request->domain)
