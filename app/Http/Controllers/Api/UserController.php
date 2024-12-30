@@ -62,7 +62,7 @@ class UserController extends Controller
             }
 
             if ($device) {
-                $device->device_info = $request->device_info();
+                $device->device_info = $request->device_info;
                 $device->status = true;
                 $device->save();
             } else {
