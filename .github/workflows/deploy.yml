@@ -40,6 +40,8 @@ jobs:
           path: |
             ${{ github.workspace }}
             !${{ github.workspace }}/.env
+            !${{ github.workspace }}/.git
+            !${{ github.workspace }}/.github
 
   deploy:
     runs-on: ubuntu-latest
