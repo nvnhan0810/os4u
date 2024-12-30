@@ -12,6 +12,8 @@ class ClientUser extends Model
     protected $fillable = [
         'client_id',
         'username',
+        'db',
+        'domain',
     ];
 
     public function devices() {
