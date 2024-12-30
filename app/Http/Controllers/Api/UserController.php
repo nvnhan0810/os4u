@@ -48,6 +48,10 @@ class UserController extends Controller
 
             if ($user) {
                 $device = $user->devices->where('device_id', $request->device_id)->first();
+                if ($user->client_id != $client->id) {
+                    $user->client_id = $client->id;
+                    $user->save();
+                }
             } else {
                 $user = ClientUser::create([
                     'username' => $request->username,
