@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClientUser;
 use App\Models\O4uClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
@@ -20,53 +21,54 @@ class UserController extends Controller
             'domain' => 'required|string',
             'db' => 'required|string',
         ]);
+        Cache::lock('user_device_unique', 10)->block(function() use ($request) {
+            $user = ClientUser::with(['devices'])
+                ->where('username', $request->username)
+                ->where('domain', $request->domain)
+                ->where('db', $request->db)
+                ->first();
+            $client = O4uClient::firstWhere('api_key', $clientKey);
 
-        $user = ClientUser::with(['devices'])
-            ->where('username', $request->username)
-            ->where('domain', $request->domain)
-            ->where('db', $request->db)
-            ->first();
-        $client = O4uClient::firstWhere('api_key', $clientKey);
+            if (!$client) {
+                $client = O4uClient::where('is_public', true)->first();
+            }
 
-        if (!$client) {
-            $client = O4uClient::where('is_public', true)->first();
-        }
+            if (!$client) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Invalid Client',
+                ]);
+            }
 
-        if (!$client) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Invalid Client',
+            $device = null;
+
+            Log::info(__METHOD__, [
+                'user' => $user,
             ]);
-        }
 
-        $device = null;
+            if ($user) {
+                $device = $user->devices->where('device_id', $request->device_id)->first();
+            } else {
+                $user = ClientUser::create([
+                    'username' => $request->username,
+                    'db' => $request->db,
+                    'domain' => $request->domain,
+                    'client_id' => $client->id,
+                ]);
+            }
 
-        Log::info(__METHOD__, [
-            'user' => $user,
-        ]);
-
-        if ($user) {
-            $device = $user->devices->where('device_id', $request->device_id)->first();
-        } else {
-            $user = ClientUser::create([
-                'username' => $request->username,
-                'db' => $request->db,
-                'domain' => $request->domain,
-                'client_id' => $client->id,
-            ]);
-        }
-
-        if ($device) {
-            $device->device_info = $request->device_info();
-            $device->status = true;
-            $device->save();
-        } else {
-            $user->devices()->create([
-                'device_info' => $request->device_info,
-                'device_id' => $request->device_id,
-                'status' => true,
-            ]);
-        }
+            if ($device) {
+                $device->device_info = $request->device_info();
+                $device->status = true;
+                $device->save();
+            } else {
+                $user->devices()->create([
+                    'device_info' => $request->device_info,
+                    'device_id' => $request->device_id,
+                    'status' => true,
+                ]);
+            }
+        });
 
         return response()->json([
             'success' => true,
