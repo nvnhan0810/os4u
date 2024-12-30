@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClientUser;
 use App\Models\O4uClient;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class UserController extends Controller
 {
@@ -39,6 +40,10 @@ class UserController extends Controller
         }
 
         $device = null;
+
+        Log::info(__METHOD__, [
+            'user' => $user,
+        ]);
 
         if ($user) {
             $device = $user->devices->where('device_id', $request->device_id)->first();
