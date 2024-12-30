@@ -24,7 +24,7 @@ class O4uClient extends Model
     }
 
     protected $fillable = [
-        'name', 'api_key', 'start_date',
+        'name', 'api_key', 'start_date', 'domain', 'db', 'is_public',
     ];
 
     /**

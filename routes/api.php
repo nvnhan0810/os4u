@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AppPermissionController;
 use App\Http\Controllers\Api\DataCryptoController;
 use App\Http\Controllers\Api\FcmController;
+use App\Http\Controllers\Api\UserController;
 use App\Http\Middleware\O4uApiKeyMiddleware;
 use App\Http\Middleware\O4uAppMiddleware;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ Route::middleware([
 ])->group(function() {
     Route::post('/app/permissions', [AppPermissionController::class, 'checkPermissions']);
     Route::post('/data/decrypt', [DataCryptoController::class, 'decrypt']);
+    Route::post('/user/device', [UserController::class, 'updateDeviceInfo']);
 });
 
 Route::middleware([
