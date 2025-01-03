@@ -86,7 +86,7 @@ jobs:
           SSH_KEY: ${{ secrets.SSH_KEY }}
       - name: Copy build to VPS
         run: |
-          rsync -avz --progress --delete -e "ssh -i ~/.ssh/id_rsa" ${{ github.workspace }}  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/o4u
+          rsync -avz --delete -e "ssh -i ~/.ssh/id_rsa" ${{ github.workspace }}  ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:/var/www/html/o4u
       - name: Deploy to Server
         if: ${{ success() }}
         uses: appleboy/ssh-action@master
